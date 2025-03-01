@@ -3,24 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Todo List</title>
+    <title>TaskMaster Pro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Create your Todo-List</h1>
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search tasks...">
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="logo">
+                <i class="fas fa-check-circle"></i>
+                <h2>TaskMaster</h2>
+            </div>
+            <div class="filter-section">
+                <h3>Filters</h3>
+                <ul class="filter-list">
+                    <li data-filter="all" class="active"><i class="fas fa-tasks"></i> All Tasks</li>
+                    <li data-filter="today"><i class="fas fa-calendar-day"></i> Today</li>
+                    <li data-filter="upcoming"><i class="fas fa-calendar-alt"></i> Upcoming</li>
+                    <li data-filter="completed"><i class="fas fa-check-double"></i> Completed</li>
+                </ul>
+            </div>
+            <div class="category-section">
+                <h3>Categories</h3>
+                <ul class="category-list" id="categoryList">
+                    <li data-category="work" class="work"><i class="fas fa-briefcase"></i> Work</li>
+                    <li data-category="personal" class="personal"><i class="fas fa-user"></i> Personal</li>
+                    <li data-category="shopping" class="shopping"><i class="fas fa-shopping-cart"></i> Shopping</li>
+                    <li data-category="health" class="health"><i class="fas fa-heartbeat"></i> Health</li>
+                </ul>
+                <button id="addCategoryBtn" class="add-category-btn"><i class="fas fa-plus"></i> Add Category</button>
+            </div>
         </div>
-        <div class="input-container">
-            <input type="text" id="taskInput" placeholder="What are your tasks?">
-            <input type="text" id="dateInput" placeholder="Select date">
-            <button onclick="addTask()">Add</button>
+
+        <div class="main-content">
+            <div class="header">
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search tasks...">
+                </div>
+                <div class="view-options">
+                    <button id="listViewBtn" class="active"><i class="fas fa-list"></i></button>
+                    <button id="gridViewBtn"><i class="fas fa-th-large"></i></button>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <div class="section-title">
+                    <h2 id="currentView">All Tasks</h2>
+                    <span id="taskCount" class="task-count">0 tasks</span>
+                </div>
+
+                <div class="input-container">
+                    <input type="text" id="taskInput" placeholder="What are your tasks?">
+                    <input type="text" id="dateInput" placeholder="Select date">
+                    <select id="taskPriority">
+                        <option value="low">Low Priority</option>
+                        <option value="medium" selected>Medium Priority</option>
+                        <option value="high">High Priority</option>
+                    </select>
+                    <select id="taskCategory">
+                        <option value="work">Work</option>
+                        <option value="personal">Personal</option>
+                        <option value="shopping">Shopping</option>
+                        <option value="health">Health</option>
+                    </select>
+                    <button id="addTaskBtn"><i class="fas fa-plus"></i> Add Task</button>
+                </div>
+
+                <div class="list-view active" id="taskList"></div>
+                
+                <div class="grid-view" id="taskGrid"></div>
+            </div>
         </div>
-        <ul id="taskList"></ul>
     </div>
+
+    <!-- Modal for task details -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Task Details</h2>
+            <div id="taskDetails"></div>
+        </div>
+    </div>
+
+    <!-- Modal for adding new category -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Category</h2>
+            <div class="category-form">
+                <input type="text" id="categoryNameInput" placeholder="Category name">
+                <input type="color" id="categoryColorInput" value="#3498db">
+                <button id="saveCategoryBtn">Save Category</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="context-menu" id="contextMenu">
+        <ul>
+            <li id="editContextMenu"><i class="fas fa-edit"></i> Edit</li>
+            <li id="completeContextMenu"><i class="fas fa-check"></i> Complete</li>
+            <li id="priorityContextMenu">
+                <i class="fas fa-flag"></i> Set Priority
+                <div class="submenu">
+                    <ul>
+                        <li data-priority="low">Low</li>
+                        <li data-priority="medium">Medium</li>
+                        <li data-priority="high">High</li>
+                    </ul>
+                </div>
+            </li>
+            <li id="deleteContextMenu"><i class="fas fa-trash-alt"></i> Delete</li>
+        </ul>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
