@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update task count
     updateTaskCount();
+    
+    // Setup category listeners
+    setupCategoryListeners();
 });
 
 // Global variables
@@ -59,20 +62,8 @@ function setupEventListeners() {
     });
     
     // View toggle buttons
-    document.getElementById('listViewBtn').addEventListener('click', function() {
-        toggleView('list');
-    });
-    
     document.getElementById('gridViewBtn').addEventListener('click', function() {
         toggleView('grid');
-    });
-    
-    // Category list items
-    document.querySelectorAll('.category-list li').forEach(item => {
-        item.addEventListener('click', function() {
-            const category = this.dataset.category;
-            filterTasksByCategory(category);
-        });
     });
     
     // Add category button
@@ -140,6 +131,32 @@ function setupEventListeners() {
         if (e.key === 'Enter') {
             addTask();
         }
+    });
+}
+
+// Setup category listeners - this is the fixed function
+function setupCategoryListeners() {
+    // Remove any existing event listeners first (to prevent duplicates)
+    document.querySelectorAll('.category-list li').forEach(item => {
+        // Clone the element to remove all event listeners
+        const newItem = item.cloneNode(true);
+        item.parentNode.replaceChild(newItem, item);
+    });
+    
+    // Add fresh event listeners
+    document.querySelectorAll('.category-list li').forEach(item => {
+        item.addEventListener('click', function() {
+            // Clear any active filters
+            document.querySelectorAll('.filter-list li').forEach(i => i.classList.remove('active'));
+            
+            const category = this.dataset.category;
+            
+            // Update current view text
+            document.getElementById('currentView').textContent = category.charAt(0).toUpperCase() + category.slice(1);
+            
+            // Filter tasks
+            filterTasksByCategory(category);
+        });
     });
 }
 
@@ -504,9 +521,9 @@ function filterTasks(filter) {
     updateTaskCount();
 }
 
+// This is the primary function that filters tasks by category
 function filterTasksByCategory(category) {
     const taskItems = document.querySelectorAll('.task-item');
-    document.getElementById('currentView').textContent = category.charAt(0).toUpperCase() + category.slice(1);
     
     taskItems.forEach(item => {
         if (item.dataset.category === category) {
@@ -522,24 +539,23 @@ function filterTasksByCategory(category) {
 function toggleView(viewType) {
     const listView = document.getElementById('taskList');
     const gridView = document.getElementById('taskGrid');
-    const listBtn = document.getElementById('listViewBtn');
     const gridBtn = document.getElementById('gridViewBtn');
     
     if (viewType === 'list') {
         listView.classList.add('active');
         gridView.classList.remove('active');
-        listBtn.classList.add('active');
         gridBtn.classList.remove('active');
     } else {
         gridView.classList.add('active');
         listView.classList.remove('active');
         gridBtn.classList.add('active');
-        listBtn.classList.remove('active');
     }
 }
 
 function updateTaskCount() {
-    const visibleTasks = document.querySelectorAll('.list-view.active .task-item:not(.hidden)').length;
+    // Get visible tasks from either the active list view or grid view
+    const activeView = document.querySelector('.list-view.active, .grid-view.active');
+    const visibleTasks = activeView.querySelectorAll('.task-item:not(.hidden)').length;
     document.getElementById('taskCount').textContent = `${visibleTasks} task${visibleTasks !== 1 ? 's' : ''}`;
 }
 
@@ -569,6 +585,51 @@ function hideContextMenu() {
     document.getElementById('contextMenu').style.display = 'none';
     contextMenuTarget = null;
 }
+
+// Mobile menu functionality
+const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+const sidebar = document.querySelector('.sidebar');
+const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
+
+// Create menu overlay
+const menuOverlay = document.createElement('div');
+menuOverlay.className = 'menu-overlay';
+document.body.appendChild(menuOverlay);
+
+// Toggle menu function
+function openMenu() {
+    sidebar.classList.add('show');
+    menuOverlay.classList.add('show');
+    document.body.style.overflow = 'hidden'; // Prevent scrolling when menu is open
+}
+
+function closeMenu() {
+    sidebar.classList.remove('show');
+    menuOverlay.classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+// Event listeners
+mobileMenuToggle.addEventListener('click', openMenu);
+closeSidebarBtn.addEventListener('click', closeMenu);
+menuOverlay.addEventListener('click', closeMenu);
+
+// Close menu when clicking on a menu item on mobile
+const menuItems = sidebar.querySelectorAll('.filter-list li, .category-list li');
+menuItems.forEach(item => {
+    item.addEventListener('click', function() {
+        if (window.innerWidth <= 768) {
+            closeMenu();
+        }
+    });
+});
+
+// Handle resize events
+window.addEventListener('resize', function() {
+    if (window.innerWidth > 768 && sidebar.classList.contains('show')) {
+        closeMenu();
+    }
+});
 
 // Category Functions
 function showCategoryModal() {
@@ -605,8 +666,12 @@ function saveNewCategory() {
         li.className = categoryName;
         li.innerHTML = `<i class="fas fa-tag"></i> ${categoryName.charAt(0).toUpperCase() + categoryName.slice(1)}`;
         
+        // Add the event listener to the new category
         li.addEventListener('click', function() {
             filterTasksByCategory(categoryName);
+            
+            // Update current view text
+            document.getElementById('currentView').textContent = categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
         });
         
         categoryList.appendChild(li);
